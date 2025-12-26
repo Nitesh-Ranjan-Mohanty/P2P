@@ -17,7 +17,9 @@ app.post('/join', (req, res) => {
         req.headers['x-forwarded-for']?.split(',')[0] ||
         req.socket.remoteAddress
 
-    const publicPort = req.socket.remotePort
+    // const publicPort = req.socket.remotePort
+    const publicPort = udpPort
+
 
     const peer = {
         ip,
