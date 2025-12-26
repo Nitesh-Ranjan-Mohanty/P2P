@@ -7,7 +7,7 @@ app.use(express.json())
 const rooms = new Map()
 
 app.post('/join', (req, res) => {
-    const { roomId, udpPort } = req.body
+    const { roomId, udpPort, lanIP } = req.body
 
     if (!roomId || !udpPort) {
         return res.status(400).json({ error: 'roomId and udpPort required' })
@@ -21,12 +21,17 @@ app.post('/join', (req, res) => {
     const publicPort = udpPort
 
 
+    // const peer = {
+    //     ip,
+    //     port: publicPort,
+    //     lastSeen: Date.now()
+    // }
     const peer = {
         ip,
-        port: publicPort,
+        port: udpPort,
+        lanIP,
         lastSeen: Date.now()
     }
-
     if (!rooms.has(roomId)) {
         rooms.set(roomId, new Map())
     }
