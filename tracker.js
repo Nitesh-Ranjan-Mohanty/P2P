@@ -7,46 +7,40 @@ app.use(express.json())
 const rooms = new Map()
 
 app.post('/join', (req, res) => {
-    const { roomId, udpPort, lanIP } = req.body
+    const { roomId, udpPort, lanIP, peerId } = req.body
 
-    if (!roomId || !udpPort) {
-        return res.status(400).json({ error: 'roomId and udpPort required' })
+    if (!roomId || !udpPort || !peerId) {
+        return res.status(400).json({
+            error: 'roomId, udpPort, and peerId required'
+        })
     }
 
     const ip =
         req.headers['x-forwarded-for']?.split(',')[0] ||
         req.socket.remoteAddress
 
-    // const publicPort = req.socket.remotePort
-    const publicPort = udpPort
-
-
-    // const peer = {
-    //     ip,
-    //     port: publicPort,
-    //     lastSeen: Date.now()
-    // }
-    const peer = {
-        ip,
-        port: udpPort,
-        lanIP,
-        lastSeen: Date.now()
-    }
     if (!rooms.has(roomId)) {
         rooms.set(roomId, new Map())
     }
 
     const room = rooms.get(roomId)
-    room.set(`${ip}:${publicPort}`, peer)
 
-    // collect other peers
-    const peers = [...room.values()].filter(p => p !== peer)
+    const peer = {
+        peerId,
+        ip,
+        port: udpPort,
+        lanIP,
+        lastSeen: Date.now()
+    }
+
+    room.set(peerId, peer)
 
     res.json({
         you: peer,
-        peers
+        peers: [...room.values()].filter(p => p.peerId !== peerId)
     })
 })
+
 
 // cleanup dead peers
 setInterval(() => {
